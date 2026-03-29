@@ -7,7 +7,7 @@ app=Flask(__name__)
 with open("tm1.pkl","rb") as model_file:
 	ml_model=pickle.load(model_file)
 
-@app.route("/pp")
+@app.route("/")
 def index():
 	return render_template("index.html")
 
