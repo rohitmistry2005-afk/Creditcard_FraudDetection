@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FraudShield AI – Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── CSS Variables ── */
+    :root {
+      --bg-deep:      #05080f;
+      --bg-card:      #0c1220;
+      --bg-card2:     #0f1828;
+      --bg-input:     #111d2e;
+      --border:       rgba(56,189,248,0.12);
+      --border-hot:   rgba(239,68,68,0.35);
+      --accent-blue:  #38bdf8;
+      --accent-cyan:  #06b6d4;
+      --accent-red:   #ef4444;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --text-primary: #e2eaf8;
+      --text-muted:   #6b7fa8;
+      --text-dim:     #3d5070;
+      --glow-blue:    0 0 24px rgba(56,189,248,0.18);
+      --glow-red:     0 0 18px rgba(239,68,68,0.22);
+      --radius:       12px;
+      --radius-sm:    8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield BG ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56,189,248,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(6,182,212,0.05) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 0;
+      padding: 0 28px;
+      height: 58px;
+      background: rgba(5,8,15,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 9px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.25rem; font-weight: 700;
+      letter-spacing: 2px; color: var(--text-primary);
+      text-transform: uppercase; margin-right: 36px;
+    }
+    .nav-brand svg { color: var(--accent-blue); }
+
+    .nav-links {
+      display: flex; gap: 2px; flex: 1;
+    }
+    .nav-link {
+      padding: 6px 16px;
+      font-size: 0.82rem; font-weight: 500; letter-spacing: 0.5px;
+      color: var(--text-muted); cursor: pointer;
+      border-radius: 6px; position: relative;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    .nav-link:hover { color: var(--text-primary); }
+
+    .badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      background: var(--accent-red); border-radius: 99px;
+      font-size: 0.65rem; font-weight: 700; color: #fff;
+      margin-left: 5px; vertical-align: middle;
+    }
+
+    .nav-right {
+      display: flex; align-items: center; gap: 16px; margin-left: auto;
+    }
+    .nav-icon-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--bg-card2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s;
+      position: relative;
+    }
+    .nav-icon-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+    .notif-dot {
+      position: absolute; top: 5px; right: 5px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent-red);
+      border: 2px solid var(--bg-deep);
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0c4a6e 100%);
+      border: 1.5px solid var(--accent-blue);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: var(--accent-blue);
+      cursor: pointer;
+    }
+    .user-name { font-size: 0.82rem; color: var(--text-primary); cursor: pointer; }
+
+    /* ── MAIN LAYOUT ── */
+    main {
+      position: relative; z-index: 1;
+      padding: 24px 28px 40px;
+      display: flex; flex-direction: column; gap: 22px;
+    }
+
+    /* ── STAT CARDS ROW ── */
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px 14px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .stat-card:hover {
+      border-color: rgba(56,189,248,0.28);
+      box-shadow: var(--glow-blue);
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(56,189,248,0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .stat-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 0.72rem; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .stat-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .stat-badge.green  { background: rgba(34,197,94,0.15); color: var(--accent-green); }
+    .stat-badge.red    { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+    .stat-badge.urgent { background: var(--accent-red); color: #fff; }
+    .stat-badge.saved  { background: rgba(34,197,94,0.18); color: var(--accent-green); }
+
+    .stat-value {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2.1rem; font-weight: 700; line-height: 1.1;
+      color: var(--text-primary); margin-bottom: 10px;
+    }
+
+    /* Sparkline SVG */
+    .sparkline { width: 100%; height: 36px; }
+
+    /* ── GRID: Heatmap + Alert Queue ── */
+    .mid-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 16px;
+    }
+
+    /* ── CARD BASE ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem; font-weight: 600; letter-spacing: 0.5px;
+    }
+    .card-action {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; color: var(--text-muted);
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .card-action:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+    /* ── HEATMAP CARD ── */
+    .heatmap-card { padding: 0; }
+    .heatmap-body { padding: 16px 18px; position: relative; }
+    .map-container {
+      position: relative;
+      width: 100%; padding-bottom: 62%;
+      background: #07101c;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .map-svg {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+    }
+
+    /* ── ALERT QUEUE ── */
+    .alert-body { padding: 0; }
+    .alert-table { width: 100%; border-collapse: collapse; }
+    .alert-table thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+    .alert-table thead th {
+      font-size: 0.65rem; font-weight: 600; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 10px 14px; text-align: left;
+    }
+    .alert-table tbody tr {
+      border-bottom: 1px solid rgba(56,189,248,0.06);
+      transition: background 0.15s;
+    }
+    .alert-table tbody tr:hover { background: rgba(56,189,248,0.04); }
+    .alert-table tbody tr:last-child { border-bottom: none; }
+    .alert-table td { padding: 12px 14px; vertical-align: middle; }
+
+    .txn-id {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem; color: var(--text-primary);
+    }
+    .txn-flag {
+      font-size: 0.62rem; color: var(--accent-red); margin-top: 2px;
+    }
+    .txn-amount-main { font-size: 0.82rem; font-weight: 600; }
+    .txn-amount-sub { font-size: 0.62rem; color: var(--text-muted); }
+    .risk-high {
+      font-size: 0.72rem; font-weight: 700; color: var(--accent-red);
+      white-space: nowrap;
+    }
+    .warn-icon {
+      color: var(--accent-red); margin-right: 4px;
+      display: inline-block; vertical-align: middle;
+      font-size: 0.9rem;
+    }
+
+    .btn-review {
+      padding: 5px 14px;
+      background: var(--accent-blue);
+      border: none; border-radius: 6px;
+      font-size: 0.72rem; font-weight: 600; color: #fff;
+      cursor: pointer; white-space: nowrap;
+      transition: opacity 0.2s, box-shadow 0.2s;
+    }
+    .btn-review:hover {
+      opacity: 0.85;
+      box-shadow: 0 0 12px rgba(56,189,248,0.4);
+    }
+    .btn-review.outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-review.outline:hover {
+      border-color: var(--accent-blue); color: var(--accent-blue);
+    }
+
+    /* ── BOTTOM: Model Performance ── */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Trend Chart */
+    .trend-body { padding: 16px 18px; }
+    .mini-chart { width: 100%; height: 120px; }
+
+    /* Top Anomalies */
+    .anomaly-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+    /* .anomaly-row {} */
+    .anomaly-label {
+      font-size: 0.73rem; color: var(--text-muted); margin-bottom: 5px;
+    }
+    .anomaly-bar-wrap {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .anomaly-bar-bg {
+      flex: 1; height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .anomaly-bar-fill {
+      height: 100%; border-radius: 3px;
+      transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    }
+    .anomaly-pct {
+      font-size: 0.7rem; font-weight: 600; min-width: 36px; text-align: right;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card  { animation: fadeUp 0.5s ease both; }
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.10s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.20s; }
+    .mid-grid > * { animation: fadeUp 0.5s ease both; animation-delay: 0.25s; }
+    .bottom-grid > * { animation: fadeUp 0.5s ease both; animation-delay: 0.35s; }
+
+    /* Pulse on fraud markers */
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.6); opacity: 0.8; }
+      80%  { transform: scale(2.2); opacity: 0; }
+      100% { opacity: 0; }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s ease-out infinite;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .stat-cards { grid-template-columns: repeat(2,1fr); }
+      .mid-grid   { grid-template-columns: 1fr; }
+      .bottom-grid{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      main { padding: 16px; }
+      .stat-cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-value { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ NAVBAR ═══════════════════════════ -->
+<nav>
+  <div class="nav-brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+    FraudShield <span style="color:var(--accent-blue);margin-left:4px">AI</span>
+  </div>
+
+<div class="nav-links">
+  <a class="nav-link active" href="{{ url_for('dashboard') }}">Overview</a>
+  <a class="nav-link" href="{{ url_for('transactions') }}">Transactions</a>
+  <a class="nav-link" href="#">Flagged Alerts <span class="badge">12</span></a>
+  <a class="nav-link" href="#">Analytics</a>
+  <a class="nav-link" href="#">Rules</a>
+  <a class="nav-link" href="#">Settings</a>
+</div>
+
+  <div class="nav-right">
+    <div class="nav-icon-btn">
+      <div class="notif-dot"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="avatar">AP</div>
+    <span class="user-name">A. Patel ▾</span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+<main>
+
+  <!-- ── STAT CARDS ── -->
+  <div class="stat-cards">
+
+    <!-- Total Transactions -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Total Transactions</span>
+        <span class="stat-badge green">+3.8%</span>
+      </div>
+      <div class="stat-value">1.24M</div>
+      <svg class="sparkline" viewBox="0 0 160 36" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,28 C20,24 30,18 50,20 C70,22 80,14 100,16 C120,18 130,10 160,8" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+        <path d="M0,28 C20,24 30,18 50,20 C70,22 80,14 100,16 C120,18 130,10 160,8 L160,36 L0,36 Z" fill="url(#sg1)"/>
+      </svg>
+    </div>
+
+    <!-- Flagged Alerts -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Flagged Alerts</span>
+        <span class="stat-badge urgent">6 Urgent</span>
+      </div>
+      <div class="stat-value">342</div>
+      <svg class="sparkline" viewBox="0 0 160 36" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ef4444" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,22 C15,18 25,28 45,24 C65,20 75,10 95,14 C110,18 125,26 145,20 C152,18 156,16 160,14" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        <path d="M0,22 C15,18 25,28 45,24 C65,20 75,10 95,14 C110,18 125,26 145,20 C152,18 156,16 160,14 L160,36 L0,36 Z" fill="url(#sg2)"/>
+      </svg>
+    </div>
+
+    <!-- Fraud Detected -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Fraud Detected</span>
+        <span class="stat-badge red">-1.2%</span>
+      </div>
+      <div class="stat-value">18</div>
+      <svg class="sparkline" viewBox="0 0 160 36" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="sg3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,20 C20,18 35,22 55,20 C75,18 90,16 110,18 C130,20 145,16 160,14" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+        <path d="M0,20 C20,18 35,22 55,20 C75,18 90,16 110,18 C130,20 145,16 160,14 L160,36 L0,36 Z" fill="url(#sg3)"/>
+      </svg>
+    </div>
+
+    <!-- Blocked Amount -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Blocked Amount</span>
+        <span class="stat-badge saved">Saved</span>
+      </div>
+      <div class="stat-value">$142.5K</div>
+      <svg class="sparkline" viewBox="0 0 160 36" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="sg4" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#22c55e" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,26 C20,24 35,22 55,20 C75,18 90,14 110,12 C130,10 145,10 160,8" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+        <path d="M0,26 C20,24 35,22 55,20 C75,18 90,14 110,12 C130,10 145,10 160,8 L160,36 L0,36 Z" fill="url(#sg4)"/>
+      </svg>
+    </div>
+
+  </div><!-- /stat-cards -->
+
+  <!-- ── MID GRID: Heatmap + Alert Queue ── -->
+  <div class="mid-grid">
+
+    <!-- Live Fraud Heatmap -->
+    <div class="card heatmap-card">
+      <div class="card-header">
+        <span class="card-title">Live Fraud Heatmap</span>
+        <button class="card-action">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Location ▾
+        </button>
+      </div>
+      <div class="heatmap-body">
+        <div class="map-container">
+          <!-- North America SVG Map (simplified outlines) -->
+          <svg class="map-svg" viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="mapBg" cx="50%" cy="50%" r="70%">
+                <stop offset="0%" stop-color="#0d1e35"/>
+                <stop offset="100%" stop-color="#07101c"/>
+              </radialGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="4" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+              </filter>
+              <!-- Glow halos for fraud clusters -->
+              <radialGradient id="halo-red" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="halo-blue" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+
+            <rect width="560" height="360" fill="url(#mapBg)"/>
+
+            <!-- Grid lines subtle -->
+            <g stroke="rgba(56,189,248,0.04)" stroke-width="0.5">
+              <line x1="0" y1="90" x2="560" y2="90"/>
+              <line x1="0" y1="180" x2="560" y2="180"/>
+              <line x1="0" y1="270" x2="560" y2="270"/>
+              <line x1="140" y1="0" x2="140" y2="360"/>
+              <line x1="280" y1="0" x2="280" y2="360"/>
+              <line x1="420" y1="0" x2="420" y2="360"/>
+            </g>
+
+            <!-- North America rough outline -->
+            <path d="
+              M60,20 L140,15 L200,10 L260,20 L310,25 L340,30
+              L360,50 L370,80 L380,110 L390,140
+              L400,160 L420,170 L440,175 L460,185
+              L455,210 L440,230 L420,250 L400,270
+              L380,290 L360,310 L330,325 L290,330
+              L260,335 L240,325 L220,300 L200,280
+              L180,265 L160,260 L150,250 L155,230
+              L150,210 L145,195 L130,185 L110,175
+              L90,160 L75,140 L65,110 L55,80
+              L50,50 Z
+            " fill="#0f2035" stroke="rgba(56,189,248,0.15)" stroke-width="0.8"/>
+
+            <!-- Canada upper region -->
+            <path d="
+              M60,20 L200,10 L340,30 L370,80 L310,75
+              L260,70 L200,80 L140,75 L80,85 L60,60 Z
+            " fill="#0c1a2e" stroke="rgba(56,189,248,0.1)" stroke-width="0.5"/>
+
+            <!-- Mexico/South -->
+            <path d="
+              M240,290 L260,300 L280,310 L260,335 L240,325
+              L220,300 Z
+            " fill="#0d1e35" stroke="rgba(56,189,248,0.08)" stroke-width="0.5"/>
+
+            <!-- Ocean tint on sides -->
+            <rect x="0" y="0" width="55" height="360" fill="rgba(5,8,15,0.5)"/>
+            <rect x="465" y="0" width="95" height="360" fill="rgba(5,8,15,0.5)"/>
+
+            <!-- ── Fraud cluster halos ── -->
+            <!-- LA cluster -->
+            <ellipse cx="108" cy="200" rx="38" ry="38" fill="url(#halo-red)" opacity="0.9"/>
+            <!-- Texas cluster -->
+            <ellipse cx="220" cy="220" rx="30" ry="30" fill="url(#halo-red)" opacity="0.7"/>
+            <!-- Miami -->
+            <ellipse cx="320" cy="250" rx="24" ry="24" fill="url(#halo-red)" opacity="0.6"/>
+            <!-- Chicago -->
+            <ellipse cx="280" cy="155" rx="20" ry="20" fill="url(#halo-red)" opacity="0.5"/>
+
+            <!-- Legitimate glow nodes (blue) -->
+            <ellipse cx="180" cy="90"  rx="22" ry="22" fill="url(#halo-blue)" opacity="0.7"/>
+            <ellipse cx="310" cy="100" rx="18" ry="18" fill="url(#halo-blue)" opacity="0.6"/>
+            <ellipse cx="220" cy="145" rx="16" ry="16" fill="url(#halo-blue)" opacity="0.5"/>
+            <ellipse cx="370" cy="160" rx="14" ry="14" fill="url(#halo-blue)" opacity="0.45"/>
+            <ellipse cx="430" cy="220" rx="14" ry="14" fill="url(#halo-blue)" opacity="0.4"/>
+            <ellipse cx="120" cy="80"  rx="12" ry="12" fill="url(#halo-blue)" opacity="0.35"/>
+
+            <!-- Connection lines between fraud clusters -->
+            <g stroke="#ef4444" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.45">
+              <line x1="108" y1="200" x2="220" y2="220"/>
+              <line x1="220" y1="220" x2="280" y2="155"/>
+              <line x1="280" y1="155" x2="320" y2="250"/>
+              <line x1="220" y1="220" x2="320" y2="250"/>
+            </g>
+
+            <!-- ── Blue nodes (legit hotspots) ── -->
+            <g>
+              <!-- Seattle area -->
+              <circle cx="90" cy="100" r="5" fill="#38bdf8" opacity="0.9" filter="url(#glow)"/>
+              <circle cx="90" cy="100" r="9" fill="none" stroke="#38bdf8" stroke-width="0.8" opacity="0.4" class="pulse-ring"/>
+              <!-- Denver -->
+              <circle cx="190" cy="160" r="4" fill="#38bdf8" opacity="0.85" filter="url(#glow)"/>
+              <!-- NYC -->
+              <circle cx="358" cy="130" r="5" fill="#06b6d4" opacity="0.9" filter="url(#glow)"/>
+              <!-- Canada west -->
+              <circle cx="135" cy="70" r="4" fill="#38bdf8" opacity="0.7"/>
+              <!-- Canada east -->
+              <circle cx="310" cy="75" r="4" fill="#38bdf8" opacity="0.65"/>
+              <!-- Central -->
+              <circle cx="225" cy="148" r="4" fill="#38bdf8" opacity="0.7"/>
+              <!-- SE -->
+              <circle cx="375" cy="168" r="3.5" fill="#38bdf8" opacity="0.65"/>
+              <!-- Gulf -->
+              <circle cx="428" cy="226" r="3.5" fill="#38bdf8" opacity="0.6"/>
+            </g>
+
+            <!-- ── Red fraud markers ── -->
+            <g>
+              <!-- LA (biggest) -->
+              <circle cx="108" cy="200" r="14" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="1" class="pulse-ring"/>
+              <circle cx="108" cy="200" r="8"  fill="rgba(239,68,68,0.25)" stroke="#ef4444" stroke-width="1"/>
+              <circle cx="108" cy="200" r="4"  fill="#ef4444"/>
+
+              <!-- Texas -->
+              <circle cx="220" cy="222" r="11" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="1" class="pulse-ring" style="animation-delay:0.6s"/>
+              <circle cx="220" cy="222" r="6"  fill="rgba(239,68,68,0.25)" stroke="#ef4444" stroke-width="1"/>
+              <circle cx="220" cy="222" r="3"  fill="#ef4444"/>
+
+              <!-- Miami -->
+              <circle cx="320" cy="252" r="9"  fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="1" class="pulse-ring" style="animation-delay:1.0s"/>
+              <circle cx="320" cy="252" r="5"  fill="rgba(239,68,68,0.22)" stroke="#ef4444" stroke-width="1"/>
+              <circle cx="320" cy="252" r="2.5" fill="#ef4444"/>
+
+              <!-- Chicago -->
+              <circle cx="280" cy="157" r="8"  fill="rgba(239,68,68,0.1)"  stroke="#ef4444" stroke-width="1" class="pulse-ring" style="animation-delay:1.4s"/>
+              <circle cx="280" cy="157" r="4"  fill="rgba(239,68,68,0.2)"  stroke="#ef4444" stroke-width="1"/>
+              <circle cx="280" cy="157" r="2"  fill="#ef4444"/>
+            </g>
+
+            <!-- Coastline water shimmer -->
+            <path d="M60,20 L55,80 L50,120 M340,30 L370,80 L390,130 L420,170" stroke="rgba(56,189,248,0.08)" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Alert Queue -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Real-Time Alert Queue</span>
+        <button class="card-action">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Expert ▾
+        </button>
+      </div>
+      <div class="alert-body">
+        <table class="alert-table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Amount</th>
+              <th>Location</th>
+              <th>Risk Score</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="warn-icon">⚠</span>
+                <span class="txn-id">TXN-S523</span>
+                <div class="txn-flag">Flagged: 98%</div>
+              </td>
+              <td>
+                <div class="txn-amount-main">$520.00</div>
+                <div class="txn-amount-sub">$69.80</div>
+              </td>
+              <td style="font-size:0.75rem;color:var(--text-muted);">North<br><span style="font-size:0.65rem">North MURX</span></td>
+              <td><span class="risk-high">98% High</span></td>
+              <td><button class="btn-review">Review</button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="warn-icon">⚠</span>
+                <span class="txn-id">TXN-S522</span>
+                <div class="txn-flag">Flagged: 92%</div>
+              </td>
+              <td>
+                <div class="txn-amount-main">$520.00</div>
+                <div class="txn-amount-sub">$52.00</div>
+              </td>
+              <td style="font-size:0.75rem;color:var(--text-muted);">Location<br><span style="font-size:0.65rem">North MURX</span></td>
+              <td><span class="risk-high">98% High</span></td>
+              <td><button class="btn-review">Review</button></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="warn-icon" style="color:var(--text-muted)">⚠</span>
+                <span class="txn-id">TSN-S521</span>
+                <div class="txn-flag" style="color:var(--text-muted)">Flagged: 88%</div>
+              </td>
+              <td>
+                <div class="txn-amount-main">$520.00</div>
+                <div class="txn-amount-sub">$55.80</div>
+              </td>
+              <td style="font-size:0.75rem;color:var(--text-muted);">Locatin<br><span style="font-size:0.65rem">North MURX</span></td>
+              <td><span class="risk-high" style="color:var(--text-muted)">98% High</span></td>
+              <td><button class="btn-review outline">Review</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /mid-grid -->
+
+  <!-- ── BOTTOM: Model Performance & Anomalies ── -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Model Performance &amp; Anomalies</span>
+      <button class="card-action">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Expert ▾
+      </button>
+    </div>
+    <div class="bottom-grid" style="padding:18px 20px;gap:30px;">
+
+      <!-- Daily Fraud Trends Chart -->
+      <div>
+        <div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:12px;letter-spacing:0.4px;">Daily Fraud Trends</div>
+        <svg class="mini-chart" viewBox="0 0 320 120" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Y-axis labels -->
+          <text x="0" y="14" fill="#3d5070" font-size="9" font-family="Inter">30M</text>
+          <text x="0" y="54" fill="#3d5070" font-size="9" font-family="Inter">20M</text>
+          <text x="0" y="94" fill="#3d5070" font-size="9" font-family="Inter">10M</text>
+          <text x="5" y="115" fill="#3d5070" font-size="9" font-family="Inter">0</text>
+
+          <!-- Grid -->
+          <line x1="24" y1="10" x2="320" y2="10" stroke="rgba(255,255,255,0.04)" stroke-width="0.7"/>
+          <line x1="24" y1="50" x2="320" y2="50" stroke="rgba(255,255,255,0.04)" stroke-width="0.7"/>
+          <line x1="24" y1="90" x2="320" y2="90" stroke="rgba(255,255,255,0.04)" stroke-width="0.7"/>
+          <line x1="24" y1="110" x2="320" y2="110" stroke="rgba(255,255,255,0.04)" stroke-width="0.7"/>
+
+          <!-- Area + Line -->
+          <path d="M24,90 C50,85 70,75 90,60 C110,45 120,35 140,30 C160,25 170,50 190,55 C210,60 230,50 260,40 C280,33 300,28 320,24"
+                fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          <path d="M24,90 C50,85 70,75 90,60 C110,45 120,35 140,30 C160,25 170,50 190,55 C210,60 230,50 260,40 C280,33 300,28 320,24 L320,110 L24,110 Z"
+                fill="url(#trendGrad)"/>
+        </svg>
+      </div>
+
+      <!-- Top Anomalies -->
+      <div>
+        <div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:14px;letter-spacing:0.4px;">Top Anomalies</div>
+        <div class="anomaly-body" style="padding:0;">
+          <div class="anomaly-row">
+            <div class="anomaly-label">Daily Fraud</div>
+            <div class="anomaly-bar-wrap">
+              <div class="anomaly-bar-bg">
+                <div class="anomaly-bar-fill" style="width:82%;background:linear-gradient(90deg,#38bdf8,#06b6d4);"></div>
+              </div>
+              <span class="anomaly-pct" style="color:var(--accent-blue);">82%</span>
+            </div>
+          </div>
+          <div class="anomaly-row" style="margin-top:14px;">
+            <div class="anomaly-label">Top Anomalies</div>
+            <div class="anomaly-bar-wrap">
+              <div class="anomaly-bar-bg">
+                <div class="anomaly-bar-fill" style="width:64%;background:linear-gradient(90deg,#ef4444,#f97316);"></div>
+              </div>
+              <span class="anomaly-pct" style="color:var(--accent-red);">64%</span>
+            </div>
+          </div>
+          <div class="anomaly-row" style="margin-top:14px;">
+            <div class="anomaly-label">New Waits</div>
+            <div class="anomaly-bar-wrap">
+              <div class="anomaly-bar-bg">
+                <div class="anomaly-bar-fill" style="width:38%;background:linear-gradient(90deg,#ef4444,#dc2626);"></div>
+              </div>
+              <span class="anomaly-pct" style="color:var(--accent-red);">38%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

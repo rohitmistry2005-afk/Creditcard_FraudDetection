@@ -1,0 +1,219 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Background */
+
+.result-wrapper{
+height:90vh;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+}
+
+
+/* Modal Container */
+
+.modal{
+width:520px;
+padding:40px;
+border-radius:18px;
+
+background:rgba(25,35,60,0.75);
+backdrop-filter: blur(18px);
+-webkit-backdrop-filter: blur(18px);
+
+border:1px solid rgba(255,255,255,0.08);
+
+box-shadow:
+0 20px 60px rgba(0,0,0,0.6),
+inset 0 1px 0 rgba(255,255,255,0.05);
+
+text-align:center;
+}
+
+
+/* Title */
+
+.modal h4{
+letter-spacing:2px;
+font-size:14px;
+color:#9aa7c2;
+margin-bottom:25px;
+}
+
+
+/* Result Box */
+
+.result-box{
+display:flex;
+align-items:center;
+gap:15px;
+
+background:rgba(35,55,90,0.55);
+padding:18px 20px;
+
+border-radius:12px;
+
+border:1px solid rgba(120,200,255,0.35);
+
+box-shadow:
+0 0 20px rgba(50,180,255,0.2) inset,
+0 0 30px rgba(0,0,0,0.4);
+}
+
+
+/* Shield Icon */
+
+.icon{
+width:42px;
+height:42px;
+border-radius:10px;
+
+background:linear-gradient(135deg,#33d6ff,#4ce38a);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:22px;
+}
+
+
+/* Text */
+
+.result-text{
+flex:1;
+text-align:left;
+}
+
+.result-text h3{
+font-weight:600;
+font-size:18px;
+margin-bottom:8px;
+}
+
+.green{
+color:#58e48c;
+}
+
+.red{
+color:#ff5f5f;
+}
+
+
+/* Progress bar */
+
+.progress{
+height:6px;
+background:rgba(255,255,255,0.1);
+border-radius:10px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+width:100%;
+background:linear-gradient(90deg,#37e39c,#32b8ff);
+}
+
+.progress-bar.fraud{
+background:linear-gradient(90deg,#ff5f5f,#ff9b9b);
+}
+
+
+/* Button */
+
+.btn{
+margin-top:30px;
+
+display:block;
+width:100%;
+
+padding:14px;
+
+border-radius:10px;
+border:none;
+
+background:linear-gradient(90deg,#3a82ff,#4cc3ff);
+
+color:white;
+font-weight:600;
+font-size:15px;
+
+cursor:pointer;
+
+transition:.25s;
+text-decoration: none;
+}
+
+.btn:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 25px rgba(60,140,255,0.4);
+text-decoration: none;
+}
+
+
+/* Footer */
+
+.footer{
+margin-top:18px;
+font-size:12px;
+color:#6e7fa6;
+}
+
+</style>
+
+
+<div class="result-wrapper">
+
+<div class="modal">
+
+<h4>MODEL ANALYSIS OUTCOME</h4>
+
+<div class="result-box">
+
+<div class="icon">
+🛡️
+</div>
+
+<div class="result-text">
+
+<h3>
+Credit Card Fraud Detection: 
+<span class="{% if prediction == 1 %}red{% else %}green{% endif %}">
+{{ "Yes" if prediction == 1 else "No" }}
+</span>
+</h3>
+
+<div class="progress">
+<div class="progress-bar {% if prediction == 1 %}fraud{% endif %}"></div>
+</div>
+
+</div>
+
+</div>
+
+<a href="{{ url_for('dashboard') }}" class="btn">
+Return to Dashboard
+</a>
+
+<div class="footer">
+TXN-FORM-AUTO | {{ amount if amount else "May 24, 2024" }}
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
