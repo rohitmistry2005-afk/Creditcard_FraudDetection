@@ -31,7 +31,7 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
+    /* body {
       font-family: 'Inter', sans-serif;
       background: var(--bg-deep);
       color: var(--text-primary);
@@ -40,14 +40,14 @@
     }
 
     /* ── Starfield BG ── */
-    body::before {
+    /* body::before {
       content: '';
       position: fixed; inset: 0; z-index: 0;
       background:
         radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56,189,248,0.07) 0%, transparent 60%),
         radial-gradient(ellipse 40% 30% at 80% 80%, rgba(6,182,212,0.05) 0%, transparent 55%);
       pointer-events: none;
-    }
+    } */ */
 
     /* ── NAVBAR ── */
     nav {
@@ -371,10 +371,10 @@
 <div class="nav-links">
   <a class="nav-link" href="{{ url_for('dashboard') }}">Overview</a>
   <a class="nav-link" href="{{ url_for('transactions') }}">Transactions</a>
-  <a class="nav-link" href="#">Flagged Alerts <span class="badge">12</span></a>
-  <a class="nav-link" href="#">Analytics</a>
-  <a class="nav-link" href="#">Rules</a>
-  <a class="nav-link" href="#">Settings</a>
+  <a class="nav-link" href="{{ url_for('flaggedalerts') }}">Flagged Alerts</a>
+  <a class="nav-link" href="{{ url_for('analytics') }}">Analytics</a>
+  <a class="nav-link" href="{{ url_for('rules') }}">Rules</a>
+  <a class="nav-link" href="{{ url_for('settings') }}">Settings</a>
 </div>
 
   <div class="nav-right">

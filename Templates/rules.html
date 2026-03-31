@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FraudShield AI – Rules Management</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #080d14;
+    --surface:   #0d1520;
+    --surface2:  #111d2e;
+    --surface3:  #162336;
+    --border:    #1e3048;
+    --border2:   #243a55;
+    --accent:    #3b82f6;
+    --accent2:   #60a5fa;
+    --accent-glow: rgba(59,130,246,0.25);
+    --cyan:      #22d3ee;
+    --green:     #4ade80;
+    --amber:     #fbbf24;
+    --red:       #f87171;
+    --purple:    #a78bfa;
+    --text:      #e2eaf4;
+    --text2:     #7a9abf;
+    --text3:     #4a6a8a;
+    --heuristic: #f59e0b;
+    --compliance:#22d3ee;
+    --ai-model:  #a78bfa;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 28px;
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(59,130,246,0.08);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-right: 36px;
+  }
+
+  .logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  .nav-logo span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text);
+  }
+
+  .nav-links {
+    display: flex;
+    height: 100%;
+    list-style: none;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .nav-links li a {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text2);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    position: relative;
+  }
+
+  .nav-links li a:hover { color: var(--text); }
+
+  .nav-links li.active a {
+    color: var(--accent2);
+    border-bottom-color: var(--accent);
+    font-weight: 500;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 7px;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nav-icon-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    position: relative;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .nav-icon-btn:hover { background: var(--surface3); color: var(--text); }
+
+  .notif-dot {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 1.5px solid var(--surface);
+  }
+
+  .avatar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 10px 4px 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .avatar:hover { background: var(--surface3); }
+
+  .avatar-circle {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: #fff;
+  }
+
+  .avatar span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* ── MAIN ── */
+  main {
+    position: relative;
+    z-index: 1;
+    padding: 28px 28px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 0 0 200px;
+  }
+
+  .search-box svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+  }
+
+  .search-box input {
+    width: 100%;
+    height: 34px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    padding: 0 12px 0 32px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-box input::placeholder { color: var(--text3); }
+  .search-box input:focus { border-color: var(--accent); }
+
+  .filter-select {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .filter-select:hover { background: var(--surface3); border-color: var(--border2); color: var(--text); }
+
+  .filter-select svg { color: var(--text3); flex-shrink: 0; }
+
+  .btn-create {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 16px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent2);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-create:hover {
+    background: var(--accent-glow);
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border2); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent);
+  }
+
+  .stat-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  .si-blue   { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); }
+  .si-amber  { background: rgba(251,191,36,0.10); border: 1px solid rgba(251,191,36,0.2); }
+  .si-cyan   { background: rgba(34,211,238,0.10); border: 1px solid rgba(34,211,238,0.2); }
+  .si-purple { background: rgba(167,139,250,0.10); border: 1px solid rgba(167,139,250,0.2); }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    line-height: 1;
+  }
+
+  .stat-delta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--green);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  thead th:first-child { width: 42px; color: var(--text3); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  tbody td {
+    padding: 13px 14px;
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  tbody td:first-child {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+  }
+
+  .rule-id {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+  }
+
+  .rule-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* Type pills */
+  .type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .tp-heuristic {
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.25);
+    color: #fbbf24;
+  }
+
+  .tp-compliance {
+    background: rgba(34,211,238,0.10);
+    border: 1px solid rgba(34,211,238,0.22);
+    color: #22d3ee;
+  }
+
+  .tp-ai {
+    background: rgba(167,139,250,0.10);
+    border: 1px solid rgba(167,139,250,0.25);
+    color: #c4b5fd;
+  }
+
+  .pill-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .pd-h { background: #fbbf24; }
+  .pd-c { background: #22d3ee; }
+  .pd-a { background: #c4b5fd; }
+
+  /* Trigger */
+  .trigger-code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 5px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
+
+  /* Action */
+  .action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .action-icon { font-size: 13px; }
+  .act-decline { color: var(--red); }
+  .act-alert   { color: var(--amber); }
+  .act-stepup  { color: var(--cyan); }
+
+  /* Last hit */
+  .last-hit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* FP Ratio */
+  .fp-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fp-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    width: 36px;
+  }
+
+  .fp-bar-wrap {
+    width: 40px;
+    height: 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .fp-bar {
+    width: 6px;
+    border-radius: 2px 2px 0 0;
+    background: var(--border2);
+  }
+
+  .fp-bar.active { background: var(--accent); }
+  .fp-bar.warn   { background: var(--amber); }
+  .fp-bar.danger { background: var(--red); }
+
+  /* Toggle */
+  .toggle {
+    position: relative;
+    width: 44px; height: 22px;
+    cursor: pointer;
+  }
+
+  .toggle input { display: none; }
+
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 11px;
+    background: var(--border2);
+    transition: background 0.2s;
+  }
+
+  .toggle input:checked ~ .toggle-track {
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(59,130,246,0.4);
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  .toggle input:checked ~ .toggle-track ~ .toggle-thumb,
+  .toggle input:checked + .toggle-track + .toggle-thumb {
+    left: 25px;
+  }
+
+  /* Using a sibling trick */
+  .toggle-inner {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Action buttons */
+  .row-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .row-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+
+  .row-btn:hover { background: var(--surface3); border-color: var(--border); color: var(--text2); }
+  .row-btn.del:hover { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.3); color: var(--red); }
+
+  /* ON label toggle variant */
+  .toggle-on {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 20px;
+    padding: 3px 10px 3px 6px;
+    cursor: pointer;
+  }
+
+  .toggle-on-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(59,130,246,0.6);
+  }
+
+  .toggle-on span {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.04em;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+      /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card  { animation: fadeUp 0.5s ease both; }
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.10s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.20s; }
+    .mid-grid > * { animation: fadeUp 0.5s ease both; animation-delay: 0.25s; }
+    .bottom-grid > * { animation: fadeUp 0.5s ease both; animation-delay: 0.35s; }
+
+    /* Pulse on fraud markers */
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.6); opacity: 0.8; }
+      80%  { transform: scale(2.2); opacity: 0; }
+      100% { opacity: 0; }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s ease-out infinite;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .stat-cards { grid-template-columns: repeat(2,1fr); }
+      .mid-grid   { grid-template-columns: 1fr; }
+      .bottom-grid{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      main { padding: 16px; }
+      .stat-cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-value { font-size: 1.5rem; }
+    }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-icon">🛡</div>
+    <span>FraudShield AI</span>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="{{ url_for('dashboard') }}">Overview</a></li>
+    <li><a href="{{ url_for('transactions') }}">Transactions</a></li>
+    <li>
+      <a href="{{ url_for('flaggedalerts') }}">Flagged Alerts</a>
+    </li>
+    <li><a href="{{ url_for('analytics') }}">Analytics</a></li>
+    <li><a href="{{ url_for('rules') }}">Rules</a></li>
+    <li><a href="{{ url_for('settings') }}">Settings</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <div class="nav-icon-btn">
+      🔔
+      <div class="notif-dot"></div>
+    </div>
+    <div class="avatar">
+      <div class="avatar-circle">AP</div>
+      <span>Admin ∨</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <h1>Rules Management</h1>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search Rules…">
+    </div>
+
+    <div class="filter-select">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      By Type (Heuristic, Compliance, AI)
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+
+    <div class="filter-select">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      By Status (Active, Inacti…)
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+
+    <div class="filter-select">
+      📅 Date – Range
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+
+    <button class="btn-create">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Create New Rule
+    </button>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon si-blue">📋</div>
+      <div class="stat-info">
+        <div class="stat-label">Total Rules</div>
+        <div class="stat-value">253 <span class="stat-delta">↗8</span></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-amber">⚡</div>
+      <div class="stat-info">
+        <div class="stat-label">Active Rules</div>
+        <div class="stat-value">213 <span class="stat-delta">↗10</span></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-cyan">🔧</div>
+      <div class="stat-info">
+        <div class="stat-label">Rules with Overrides</div>
+        <div class="stat-value">15 <span class="stat-delta">↗1</span></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-purple">🤖</div>
+      <div class="stat-info">
+        <div class="stat-label">AI-Powered Rules</div>
+        <div class="stat-value">46 <span class="stat-delta">↗4</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Rule ID</th>
+          <th>Rule Name</th>
+          <th>Type</th>
+          <th>Triggers</th>
+          <th>Action</th>
+          <th>Last Hit (24h)</th>
+          <th>FP Ratio</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Row 1 -->
+        <tr>
+          <td>1</td>
+          <td><span class="rule-id">R-001</span></td>
+          <td><span class="rule-name">Excessive Txn Amount</span></td>
+          <td>
+            <span class="type-pill tp-heuristic">
+              <span class="pill-dot pd-h"></span> Heuristic
+            </span>
+          </td>
+          <td><span class="trigger-code">amount &gt; $10k</span></td>
+          <td><span class="action act-decline"><span class="action-icon">✕</span> Decline</span></td>
+          <td><span class="last-hit">55</span></td>
+          <td>
+            <div class="fp-cell">
+              <span class="fp-val">0.5%</span>
+              <div class="fp-bar-wrap">
+                <div class="fp-bar active" style="height:6px"></div>
+                <div class="fp-bar active" style="height:10px"></div>
+                <div class="fp-bar" style="height:14px"></div>
+                <div class="fp-bar" style="height:18px"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="row-btn">✏️</button>
+              <button class="row-btn">📋</button>
+              <button class="row-btn del">🗑</button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 2 -->
+        <tr>
+          <td>2</td>
+          <td><span class="rule-id">R-045</span></td>
+          <td><span class="rule-name">Geolocation Mismatch</span></td>
+          <td>
+            <span class="type-pill tp-heuristic">
+              <span class="pill-dot pd-h"></span> Heuristic
+            </span>
+          </td>
+          <td><span class="trigger-code">country != ip_country</span></td>
+          <td><span class="action act-alert"><span class="action-icon">🔔</span> Alert</span></td>
+          <td><span class="last-hit">210</span></td>
+          <td>
+            <div class="fp-cell">
+              <span class="fp-val">3.5%</span>
+              <div class="fp-bar-wrap">
+                <div class="fp-bar warn" style="height:8px"></div>
+                <div class="fp-bar warn" style="height:13px"></div>
+                <div class="fp-bar warn" style="height:17px"></div>
+                <div class="fp-bar" style="height:22px"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="row-btn">✏️</button>
+              <button class="row-btn">📋</button>
+              <button class="row-btn del">🗑</button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 3 -->
+        <tr>
+          <td>3</td>
+          <td><span class="rule-id">RA-112</span></td>
+          <td><span class="rule-name">High Velocity Pattern</span></td>
+          <td>
+            <span class="type-pill tp-ai">
+              <span class="pill-dot pd-a"></span> AI-Model
+            </span>
+          </td>
+          <td><span class="trigger-code">velocity_score &gt; 0.85</span></td>
+          <td><span class="action act-stepup"><span class="action-icon">🔑</span> Step-Up</span></td>
+          <td><span class="last-hit">10</span></td>
+          <td>
+            <div class="fp-cell">
+              <span class="fp-val">0.1%</span>
+              <div class="fp-bar-wrap">
+                <div class="fp-bar active" style="height:5px"></div>
+                <div class="fp-bar" style="height:9px"></div>
+                <div class="fp-bar" style="height:13px"></div>
+                <div class="fp-bar" style="height:18px"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="row-btn">✏️</button>
+              <button class="row-btn">📋</button>
+              <button class="row-btn del">🗑</button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 4 -->
+        <tr>
+          <td>4</td>
+          <td><span class="rule-id">C-003</span></td>
+          <td><span class="rule-name">Bin List Exclusion</span></td>
+          <td>
+            <span class="type-pill tp-compliance">
+              <span class="pill-dot pd-c"></span> Compliance
+            </span>
+          </td>
+          <td><span class="trigger-code">bin IN [list_compliance]</span></td>
+          <td><span class="action act-decline"><span class="action-icon">✕</span> Decline</span></td>
+          <td><span class="last-hit">2</span></td>
+          <td>
+            <div class="fp-cell">
+              <span class="fp-val">0.0%</span>
+              <div class="fp-bar-wrap">
+                <div class="fp-bar" style="height:5px"></div>
+                <div class="fp-bar" style="height:9px"></div>
+                <div class="fp-bar" style="height:13px"></div>
+                <div class="fp-bar" style="height:18px"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="row-btn">✏️</button>
+              <button class="row-btn">📋</button>
+              <button class="row-btn del">🗑</button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 5 -->
+        <tr>
+          <td>5</td>
+          <td><span class="rule-id">R-046</span></td>
+          <td><span class="rule-name">Mismatched AVS Zip Code</span></td>
+          <td>
+            <span class="type-pill tp-heuristic">
+              <span class="pill-dot pd-h"></span> Heuristic
+            </span>
+          </td>
+          <td><span class="trigger-code">avs_zip_mismatch == 'TRUE'</span></td>
+          <td><span class="action act-decline"><span class="action-icon">✕</span> Decline</span></td>
+          <td><span class="last-hit">18</span></td>
+          <td>
+            <div class="fp-cell">
+              <span class="fp-val">2.1%</span>
+              <div class="fp-bar-wrap">
+                <div class="fp-bar warn" style="height:6px"></div>
+                <div class="fp-bar warn" style="height:11px"></div>
+                <div class="fp-bar" style="height:15px"></div>
+                <div class="fp-bar" style="height:20px"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="toggle-on">
+              <div class="toggle-on-dot"></div>
+              <span>ON</span>
+            </div>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="row-btn">✏️</button>
+              <button class="row-btn">📋</button>
+              <button class="row-btn del">🗑</button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 6 -->
+        <tr>
+          <td>6</td>
+          <td><span class="rule-id">C-004</span></td>
+          <td><span class="rule-name">BIN Country Conflict</span></td>
+          <td>
+            <span class="type-pill tp-compliance">
+              <span class="pill-dot pd-c"></span> Compliance
+            </span>
+          </td>
+          <td><span class="trigger-code">bin_country != ip_country</span></td>
+          <td><span class="action act-alert"><span class="action-icon">🔔</span> Alert</span></td>
+          <td><span class="last-hit">42</span></td>
+          <td>
+            <div class="fp-cell">
+              <span class="fp-val">3.1%</span>
+              <div class="fp-bar-wrap">
+                <div class="fp-bar warn" style="height:7px"></div>
+                <div class="fp-bar warn" style="height:12px"></div>
+                <div class="fp-bar warn" style="height:16px"></div>
+                <div class="fp-bar" style="height:21px"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="toggle-on">
+              <div class="toggle-on-dot"></div>
+              <span>ON</span>
+            </div>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="row-btn">✏️</button>
+              <button class="row-btn">📋</button>
+              <button class="row-btn del">🗑</button>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 7 -->
+        <tr>
+          <td>7</td>
+          <td><span class="rule-id">RA-113</span></td>
+          <td><span class="rule-name">Anomalous Merchant Category</span></td>
+          <td>
+            <span class="type-pill tp-ai">
+              <span class="pill-dot pd-a"></span> AI-Model
+            </span>
+          </td>
+          <td><span class="trigger-code">anomalous_category_match == 'TRUE'</span></td>
+          <td><span class="action act-stepup"><span class="action-icon">🔑</span> Step-Up</span></td>
+          <td><span class="last-hit">9</span></td>
+          <td>
+            <div class="fp-cell">
+              <span class="fp-val">0.2%</span>
+              <div class="fp-bar-wrap">
+                <div class="fp-bar active" style="height:5px"></div>
+                <div class="fp-bar" style="height:9px"></div>
+                <div class="fp-bar" style="height:14px"></div>
+                <div class="fp-bar" style="height:19px"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="toggle-on">
+              <div class="toggle-on-dot"></div>
+              <span>ON</span>
+            </div>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="row-btn">✏️</button>
+              <button class="row-btn">📋</button>
+              <button class="row-btn del">🗑</button>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+  // Make toggles functional
+  document.querySelectorAll('.toggle input').forEach(input => {
+    input.addEventListener('change', function() {
+      const thumb = this.parentElement.querySelector('.toggle-thumb');
+      thumb.style.left = this.checked ? '25px' : '3px';
+    });
+  });
+</script>
+</body>
+</html>

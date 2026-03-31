@@ -1,0 +1,635 @@
+{% extends "layout.html" %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><style>
+  :root {
+    --bg: #090d1a;
+    --bg2: #0e1528;
+    --bg3: #141c35;
+    --border: rgba(99,130,255,0.14);
+    --accent-blue: #4f7cff;
+    --accent-red: #ff4f6a;
+    --accent-gold: #f5c842;
+    --accent-teal: #36e4c8;
+    --text: #d6deff;
+    --text-dim: #6876a8;
+    --text-bright: #ffffff;
+    --card-bg: rgba(15,21,48,0.85);
+    --card-glow-blue: 0 0 0 1px rgba(79,124,255,0.18), 0 4px 32px rgba(79,124,255,0.07);
+    --card-glow-red: 0 0 0 1px rgba(255,79,106,0.22), 0 4px 24px rgba(255,79,106,0.09);
+    --font-head: 'Space Mono', monospace;
+    --font-mono: 'Space Mono', monospace;
+    --radius: 12px;
+    --radius-sm: 7px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 20% 0%, rgba(79,124,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 100%, rgba(255,79,106,0.05) 0%, transparent 70%);
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 52px;
+    background: rgba(9,13,26,0.97);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-right: 36px;
+    text-decoration: none;
+  }
+  .nav-brand-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, #4f7cff 0%, #a78bfa 100%);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 0 14px rgba(79,124,255,0.35);
+  }
+  .nav-brand-text {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: .06em;
+    color: var(--text-bright);
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    list-style: none;
+  }
+  .nav-links li a {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 14px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: color .18s, background .18s;
+    position: relative;
+  }
+  .nav-links li a:hover { color: var(--text); background: rgba(79,124,255,0.08); }
+  .nav-links li.active a {
+    color: var(--text-bright);
+    background: rgba(79,124,255,0.13);
+  }
+  .nav-links li.active a::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 14px; right: 14px;
+    height: 2px;
+    background: var(--accent-blue);
+    border-radius: 2px;
+    box-shadow: 0 0 8px var(--accent-blue);
+  }
+  .nav-badge {
+    background: var(--accent-red);
+    color: #fff;
+    font-size: 10px;
+    font-family: var(--font-head);
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 20px;
+    min-width: 19px;
+    text-align: center;
+    box-shadow: 0 0 8px rgba(255,79,106,0.5);
+  }
+  .nav-right {
+    display: flex; align-items: center; gap: 10px; margin-left: auto;
+  }
+  .nav-icon-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-dim);
+    position: relative;
+    transition: border-color .18s;
+  }
+  .nav-icon-btn:hover { border-color: var(--accent-blue); }
+  .notif-dot {
+    position: absolute;
+    top: 5px; right: 5px;
+    width: 7px; height: 7px;
+    background: var(--accent-red);
+    border-radius: 50%;
+    border: 1.5px solid var(--bg);
+    box-shadow: 0 0 6px var(--accent-red);
+  }
+  .nav-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#4f7cff,#a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 12px;
+    color: #fff;
+    cursor: pointer;
+  }
+  .nav-admin {
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* ── MAIN ── */
+  main { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+
+  h1 {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-bright);
+    margin-bottom: 18px;
+    letter-spacing: -.01em;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    min-width: 180px;
+    transition: border-color .18s;
+  }
+  .search-box:focus-within { border-color: var(--accent-blue); }
+  .search-box input {
+    background: none; border: none; outline: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    width: 100%;
+  }
+  .search-box input::placeholder { color: var(--text-dim); }
+  .filter-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 13px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color .18s, background .18s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--accent-blue); background: rgba(79,124,255,0.07); }
+  .filter-btn .icon { color: var(--accent-blue); font-size: 11px; }
+  .filter-btn .chevron { color: var(--text-dim); font-size: 10px; }
+  .date-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 13px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    margin-left: auto;
+    transition: border-color .18s;
+  }
+  .date-chip:hover { border-color: var(--accent-blue); }
+  .date-chip .cal { color: var(--accent-blue); }
+
+  /* ── STAT CARDS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: var(--card-glow-blue);
+    transition: border-color .22s, box-shadow .22s;
+    animation: fadeUp .45s ease both;
+  }
+  .stat-card:hover {
+    border-color: rgba(79,124,255,0.38);
+    box-shadow: 0 0 0 1px rgba(79,124,255,0.3), 0 8px 40px rgba(79,124,255,0.12);
+  }
+  .stat-card.red { box-shadow: var(--card-glow-red); }
+  .stat-card.red:hover {
+    border-color: rgba(255,79,106,0.38);
+    box-shadow: 0 0 0 1px rgba(255,79,106,0.3), 0 8px 40px rgba(255,79,106,0.12);
+  }
+  .stat-icon {
+    width: 40px; height: 40px; flex-shrink: 0;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .stat-icon.blue { background: rgba(79,124,255,0.15); color: var(--accent-blue); border: 1px solid rgba(79,124,255,0.25); }
+  .stat-icon.red  { background: rgba(255,79,106,0.12); color: var(--accent-red);  border: 1px solid rgba(255,79,106,0.22); }
+  .stat-icon.teal { background: rgba(54,228,200,0.10); color: var(--accent-teal); border: 1px solid rgba(54,228,200,0.2); }
+  .stat-icon.globe { background: rgba(79,124,255,0.10); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+  .stat-body { flex: 1; min-width: 0; }
+  .stat-label {
+    font-family: var(--font-head);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-bottom: 5px;
+    line-height: 1.3;
+  }
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-bright);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-delta {
+    font-size: 11px;
+    display: flex; align-items: center; gap: 3px;
+    font-weight: 500;
+  }
+  .stat-delta.up   { color: #36e4a0; }
+  .stat-delta.down { color: var(--accent-red); }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--card-glow-blue);
+    animation: fadeUp .55s ease both;
+  }
+  .panel-title {
+    font-family: var(--font-head);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .panel-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 12px;
+    background: var(--accent-blue);
+    border-radius: 2px;
+  }
+
+  /* ── CHART ── */
+  .chart-wrap { position: relative; height: 180px; }
+  .chart-legend {
+    display: flex; gap: 18px; margin-bottom: 10px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); }
+  .legend-dot { width: 10px; height: 3px; border-radius: 2px; }
+  .legend-dot.blue { background: var(--accent-blue); }
+  .legend-dot.red  { background: var(--accent-red); }
+
+  svg.chart { width: 100%; height: 100%; overflow: visible; }
+
+  /* Y-axis labels */
+    .y-label { font-family: 'Space Mono', monospace; }
+    .x-label { font-family: 'Space Mono', monospace; }
+  .grid-line { stroke: rgba(99,130,255,0.08); stroke-width: 1; }
+
+  /* ── TOP FRAUD INDICATORS ── */
+  .indicator-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .indicator-icon { width: 16px; text-align: center; color: var(--text-dim); font-size: 12px; }
+  .indicator-label { width: 120px; font-size: 11px; color: var(--text); white-space: nowrap; }
+  .bar-track {
+    flex: 1;
+    height: 7px;
+    background: rgba(79,124,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    position: relative;
+    animation: barGrow .7s cubic-bezier(.4,0,.2,1) both;
+  }
+  @keyframes barGrow {
+    from { width: 0 !important; opacity: 0; }
+    to { opacity: 1; }
+  }
+  .bar-fill.blue  { background: linear-gradient(90deg, var(--accent-blue), #7aa4ff); }
+  .bar-fill.red   { background: linear-gradient(90deg, var(--accent-red), #ff8fa3); }
+  .bar-fill.teal  { background: linear-gradient(90deg, var(--accent-teal), #7ffff0); }
+  .bar-fill.gold  { background: linear-gradient(90deg, var(--accent-gold), #ffe57a); }
+  .bar-fill.purple{ background: linear-gradient(90deg, #a78bfa, #c4b5fd); }
+
+  /* ── FRAUD BY TX TYPE ── */
+  .fraud-tx-row {
+    display: flex; gap: 18px; align-items: flex-end; justify-content: center; padding-top: 8px;
+  }
+  .fraud-tx-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .tx-square {
+    width: 80px; height: 80px;
+    border-radius: var(--radius-sm);
+    border: 2px solid;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tx-square.credit {
+    border-color: rgba(79,124,255,0.4);
+    background: rgba(79,124,255,0.07);
+    color: var(--accent-blue);
+  }
+  .tx-square.wire {
+    border-color: rgba(255,79,106,0.4);
+    background: rgba(255,79,106,0.07);
+    color: var(--accent-red);
+  }
+  .tx-label { font-size: 11px; color: var(--text-dim); text-align: center; }
+
+  /* ── EMERGING PATTERNS ── */
+  .pattern-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(99,130,255,0.07);
+    gap: 10px;
+  }
+  .pattern-item:last-child { border-bottom: none; }
+  .pattern-text { font-size: 11px; color: var(--text); line-height: 1.4; flex: 1; }
+  .pattern-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: var(--font-head);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .pattern-badge.new { background: rgba(255,79,106,0.15); color: var(--accent-red); border: 1px solid rgba(255,79,106,0.25); }
+  .pattern-icon { font-size: 14px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .stat-card:nth-child(1) { animation-delay: .05s; }
+  .stat-card:nth-child(2) { animation-delay: .12s; }
+  .stat-card:nth-child(3) { animation-delay: .19s; }
+  .stat-card:nth-child(4) { animation-delay: .26s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+    .bottom-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MAIN -->
+<main>
+  <h1>Analytics</h1>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span style="color:var(--text-dim);font-size:13px;">🔍</span>
+      <input type="text" placeholder="Search Alerts">
+    </div>
+    <button class="filter-btn"><span class="icon">⬆</span> By Risk Score <span class="chevron">∨</span></button>
+    <button class="filter-btn"><span class="icon">⬆</span> Transaction Type <span class="chevron">∨</span></button>
+    <button class="filter-btn"><span class="cal">📅</span> Date – Range <span class="chevron">∨</span></button>
+    <div class="date-chip"><span class="cal">◎</span> Last 30 Days (Apr 25 – May 24, 2024) <span>∨</span></div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon blue">📈</div>
+      <div class="stat-body">
+        <div class="stat-label">Total Alerts Analyzed</div>
+        <div class="stat-value">1,240,050</div>
+        <div class="stat-delta up">↗ +3%</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon red">🛡</div>
+      <div class="stat-body">
+        <div class="stat-label">Total Fraud Incidences Detected</div>
+        <div class="stat-value">148</div>
+        <div class="stat-delta up">↗ +10%</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon teal">👤</div>
+      <div class="stat-body">
+        <div class="stat-label">False Positive Rate</div>
+        <div class="stat-value">0.5%</div>
+        <div class="stat-delta down">↘ -0.1%</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon globe">🌐</div>
+      <div class="stat-body">
+        <div class="stat-label">Average Model Confidence</div>
+        <div class="stat-value">88%</div>
+        <div class="stat-delta up">↗ stable</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM GRID (2 cols) -->
+  <div class="bottom-grid">
+
+    <!-- Alert Volume Over Time -->
+    <div class="panel" style="grid-column: 1; grid-row: 1 / 3;">
+      <div class="panel-title">Alert Volume Over Time</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot blue"></div> Total Alerts</div>
+        <div class="legend-item"><div class="legend-dot red"></div> Fraud Alerts</div>
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart" viewBox="0 0 520 180" preserveAspectRatio="none">
+          <!-- Grid lines -->
+          <line x1="42" y1="10"  x2="520" y2="10"  class="grid-line"/>
+          <line x1="42" y1="50"  x2="520" y2="50"  class="grid-line"/>
+          <line x1="42" y1="90"  x2="520" y2="90"  class="grid-line"/>
+          <line x1="42" y1="130" x2="520" y2="130" class="grid-line"/>
+          <line x1="42" y1="168" x2="520" y2="168" class="grid-line"/>
+
+          <!-- Y labels -->
+          <text x="36" y="14"  class="y-label" text-anchor="end">5,000</text>
+          <text x="36" y="54"  class="y-label" text-anchor="end">4,000</text>
+          <text x="36" y="94"  class="y-label" text-anchor="end">3,000</text>
+          <text x="36" y="134" class="y-label" text-anchor="end">2,000</text>
+          <text x="36" y="172" class="y-label" text-anchor="end">0</text>
+
+          <!-- X labels (dates) -->
+          <text x="44"  y="178" class="x-label">25</text>
+          <text x="85"  y="178" class="x-label">27</text>
+          <text x="126" y="178" class="x-label">29</text>
+          <text x="167" y="178" class="x-label">May 12</text>
+          <text x="208" y="178" class="x-label">15</text>
+          <text x="249" y="178" class="x-label">18</text>
+          <text x="290" y="178" class="x-label">20</text>
+          <text x="331" y="178" class="x-label">22</text>
+          <text x="372" y="178" class="x-label">24</text>
+          <text x="413" y="178" class="x-label">26</text>
+          <text x="454" y="178" class="x-label">28</text>
+          <text x="495" y="178" class="x-label">24</text>
+
+          <!-- Defs for gradients -->
+          <defs>
+            <linearGradient id="gradBlue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4f7cff" stop-opacity="0.22"/>
+              <stop offset="100%" stop-color="#4f7cff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="gradRed" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff4f6a" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#ff4f6a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Blue area (Total alerts) -->
+          <path d="M44,130 C60,120 70,100 85,95 C100,90 110,60 126,65 C142,70 155,80 167,75 C179,70 195,55 208,45 C221,35 235,30 249,35 C263,40 275,38 290,30 C305,22 316,18 331,25 C346,32 358,45 372,55 C386,65 398,70 413,75 C428,80 440,90 454,95 C468,100 482,105 495,110 L520,112 L520,168 L44,168 Z"
+            fill="url(#gradBlue)" />
+          <path d="M44,130 C60,120 70,100 85,95 C100,90 110,60 126,65 C142,70 155,80 167,75 C179,70 195,55 208,45 C221,35 235,30 249,35 C263,40 275,38 290,30 C305,22 316,18 331,25 C346,32 358,45 372,55 C386,65 398,70 413,75 C428,80 440,90 454,95 C468,100 482,105 495,110"
+            fill="none" stroke="#4f7cff" stroke-width="2" stroke-linejoin="round"/>
+
+          <!-- Red area (Fraud alerts) -->
+          <path d="M44,158 C60,155 70,153 85,155 C100,157 110,152 126,154 C142,156 155,150 167,151 C179,152 195,148 208,150 C221,152 235,149 249,151 C263,153 275,147 290,149 C305,151 316,146 331,148 C346,150 358,153 372,155 C386,157 398,153 413,155 C428,157 440,154 454,156 C468,158 482,155 495,157 L520,158 L520,168 L44,168 Z"
+            fill="url(#gradRed)" />
+          <path d="M44,158 C60,155 70,153 85,155 C100,157 110,152 126,154 C142,156 155,150 167,151 C179,152 195,148 208,150 C221,152 235,149 249,151 C263,153 275,147 290,149 C305,151 316,146 331,148 C346,150 358,153 372,155 C386,157 398,153 413,155 C428,157 440,154 454,156 C468,158 482,155 495,157"
+            fill="none" stroke="#ff4f6a" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="4 2"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Top Fraud Indicators -->
+    <div class="panel">
+      <div class="panel-title">Top Fraud Indicators</div>
+      <div class="indicator-row">
+        <div class="indicator-icon">🌐</div>
+        <div class="indicator-label">Location Mismatch</div>
+        <div class="bar-track"><div class="bar-fill blue" style="width:88%;animation-delay:.1s"></div></div>
+      </div>
+      <div class="indicator-row">
+        <div class="indicator-icon">⚡</div>
+        <div class="indicator-label">High Velocity</div>
+        <div class="bar-track"><div class="bar-fill red" style="width:72%;animation-delay:.2s"></div></div>
+      </div>
+      <div class="indicator-row">
+        <div class="indicator-icon">🌐</div>
+        <div class="indicator-label">IP Anomaly</div>
+        <div class="bar-track"><div class="bar-fill teal" style="width:58%;animation-delay:.3s"></div></div>
+      </div>
+      <div class="indicator-row">
+        <div class="indicator-icon">👤</div>
+        <div class="indicator-label">Mismatched Usage</div>
+        <div class="bar-track"><div class="bar-fill gold" style="width:44%;animation-delay:.4s"></div></div>
+      </div>
+      <div class="indicator-row">
+        <div class="indicator-icon">⏱</div>
+        <div class="indicator-label">High Frequency</div>
+        <div class="bar-track"><div class="bar-fill purple" style="width:33%;animation-delay:.5s"></div></div>
+      </div>
+    </div>
+
+    <!-- Fraud by Transaction Type -->
+    <div class="panel" style="grid-column:2; grid-row:2;">
+      <div style="display:flex; gap:14px;">
+
+        <!-- Left: Fraud by TX Type -->
+        <div style="flex:1;">
+          <div class="panel-title">Fraud by Transaction Type</div>
+          <div class="fraud-tx-row">
+            <div class="fraud-tx-item">
+              <div class="tx-square credit">💳</div>
+              <div class="tx-label">Credit Card</div>
+            </div>
+            <div class="fraud-tx-item">
+              <div class="tx-square wire">🏦</div>
+              <div class="tx-label">Wire Transfer</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Emerging Patterns -->
+        <div style="flex:1; border-left:1px solid var(--border); padding-left:14px;">
+          <div class="panel-title">Emerging Patterns</div>
+          <div class="pattern-item">
+            <div class="pattern-text">New IP Anomaly Cluster<br><span style="color:var(--text-dim);">(North America)</span></div>
+            <span class="pattern-icon" style="color:var(--accent-red);">↗</span>
+          </div>
+          <div class="pattern-item">
+            <div class="pattern-text">New IP Anomaly Cluster<br><span style="color:var(--text-dim);">(North America)</span></div>
+            <span class="pattern-icon" style="color:var(--accent-blue);">✦</span>
+          </div>
+          <div class="pattern-item">
+            <div class="pattern-text">New IP Anomaly Cluster<br><span style="color:var(--text-dim);">(North America)</span></div>
+            <span class="pattern-icon" style="color:var(--accent-red);">↗</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+{% endblock %}

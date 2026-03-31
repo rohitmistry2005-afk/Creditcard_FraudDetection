@@ -1,0 +1,691 @@
+{% extends "layout.html" %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #0b0e14;
+    --surface:   #111520;
+    --surface2:  #161b28;
+    --border:    rgba(255,255,255,0.07);
+    --accent:    #4f8ef7;
+    --accent2:   #26d8b2;
+    --warn:      #f97316;
+    --danger:    #ef4444;
+    --text:      #e4e8f0;
+    --muted:     #5a6480;
+    --green:     #22c55e;
+    --mono:      'Space Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* subtle grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 0;
+    background: rgba(11,14,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 52px;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-right: 36px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-logo .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .nav-links {
+    display: flex; align-items: center; gap: 2px;
+    list-style: none; flex: 1;
+  }
+  .nav-links li a {
+    display: block;
+    padding: 0 14px;
+    height: 52px;
+    line-height: 52px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color .2s;
+    white-space: nowrap;
+  }
+  .nav-links li a:hover { color: var(--text); }
+  .nav-links li a.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+  }
+  .nav-links .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--danger);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 10px;
+    border-radius: 20px;
+    padding: 1px 5px;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+
+  .nav-right {
+    display: flex; align-items: center; gap: 14px;
+    margin-left: auto;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+  }
+  .nav-user {
+    font-size: 13px; font-weight: 500;
+  }
+  .nav-bell {
+    position: relative;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .nav-bell .dot {
+    position: absolute; top: -4px; right: -8px;
+    background: var(--danger);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 9px;
+    border-radius: 20px;
+    padding: 1px 4px;
+    white-space: nowrap;
+  }
+
+  /* ── MAIN ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+  }
+
+  /* Page title */
+  .page-title {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+  }
+  .page-title span { color: var(--accent); }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 38px;
+    flex: 1; min-width: 180px; max-width: 260px;
+    transition: border-color .2s;
+  }
+  .search-box:focus-within { border-color: var(--accent); }
+  .search-box svg { color: var(--muted); flex-shrink: 0; }
+  .search-box input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-family: var(--sans); font-size: 13px;
+    width: 100%;
+  }
+  .search-box input::placeholder { color: var(--muted); }
+
+  .filter-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0 12px; height: 38px;
+    color: var(--text); font-family: var(--sans); font-size: 13px;
+    cursor: pointer; white-space: nowrap;
+    transition: border-color .2s;
+  }
+  .filter-btn:hover { border-color: var(--accent); }
+  .filter-btn svg { color: var(--muted); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0 18px;
+    height: 38px;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+    box-shadow: 0 0 18px rgba(79,142,247,0.35);
+    transition: background .2s, box-shadow .2s;
+    white-space: nowrap;
+  }
+  .btn-primary:hover {
+    background: #6ba3ff;
+    box-shadow: 0 0 28px rgba(79,142,247,0.5);
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  @media(max-width:800px){ .stat-grid{ grid-template-columns:repeat(2,1fr); } }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 16px;
+    transition: border-color .2s, transform .2s;
+    animation: fadeUp .4s both;
+  }
+  .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(12px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .stat-card:nth-child(1){ animation-delay:.05s }
+  .stat-card:nth-child(2){ animation-delay:.1s }
+  .stat-card:nth-child(3){ animation-delay:.15s }
+  .stat-card:nth-child(4){ animation-delay:.2s }
+
+  .stat-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+  .stat-icon.blue  { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .stat-icon.teal  { background: rgba(38,216,178,0.15); color: var(--accent2); }
+  .stat-icon.orange{ background: rgba(249,115,22,0.15);  color: var(--warn); }
+  .stat-icon.violet{ background: rgba(168,85,247,0.15);  color: #a855f7; }
+
+  .stat-info { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 22px; font-weight: 700;
+    line-height: 1;
+  }
+  .stat-value .delta {
+    font-size: 13px; font-weight: 400;
+    color: var(--green);
+    margin-left: 4px;
+  }
+
+  /* ── TWO-COL PANELS ── */
+  .panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media(max-width:750px){ .panel-grid{ grid-template-columns:1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 22px;
+    animation: fadeUp .4s .25s both;
+  }
+
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .panel-title {
+    font-family: var(--mono); font-size: 13px; font-weight: 700;
+    letter-spacing: .03em;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 7px;
+    color: var(--accent);
+    padding: 4px 12px;
+    font-size: 12px; font-family: var(--sans); font-weight: 500;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .btn-outline:hover { background: rgba(79,142,247,0.1); }
+
+  /* API rows */
+  .api-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .api-row:last-child { margin-bottom: 0; }
+
+  .api-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text);
+  }
+  .api-label .service-dot {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; font-family: var(--mono);
+    flex-shrink: 0;
+  }
+  .dot-stripe  { background: rgba(99,179,237,0.2); color: #63b3ed; }
+  .dot-db      { background: rgba(72,187,120,0.2); color: #48bb78; }
+  .dot-fraud   { background: rgba(245,101,101,0.2); color: #f56565; }
+
+  .api-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 10px;
+    color: var(--muted);
+    font-size: 12px; font-family: var(--mono);
+    outline: none;
+    width: 100%;
+    transition: border-color .2s;
+  }
+  .api-input:focus { border-color: var(--accent); color: var(--text); }
+
+  .api-status { display: flex; justify-content: center; }
+  .status-ok   { color: var(--accent2); }
+  .status-warn { color: var(--warn); }
+  .status-err  { color: var(--danger); }
+
+  /* ── GLOBAL DETECTION ── */
+  .detect-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .detect-row:last-child { margin-bottom: 0; }
+
+  .detect-label {
+    font-size: 12px; color: var(--muted);
+    white-space: nowrap; min-width: 200px;
+  }
+  .detect-label span { color: var(--text); font-weight: 500; font-family: var(--mono); }
+
+  .slider-wrap { flex: 1; }
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--surface2);
+    outline: none;
+    cursor: pointer;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px rgba(79,142,247,0.6);
+    cursor: pointer;
+  }
+  .slider.teal::-webkit-slider-thumb { background: var(--accent2); box-shadow: 0 0 6px rgba(38,216,178,0.6); }
+
+  .select-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12px; font-family: var(--sans);
+    padding: 6px 10px;
+    outline: none; cursor: pointer;
+    min-width: 110px;
+  }
+
+  /* ── SECURITY ── */
+  .sec-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .sec-row:last-child { border-bottom: none; }
+  .sec-row svg { color: var(--muted); flex-shrink: 0; }
+  .sec-label { flex: 1; }
+  .sec-value { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+  .sec-link {
+    color: var(--accent); text-decoration: none; font-size: 12px;
+    font-weight: 500;
+    transition: opacity .2s;
+    white-space: nowrap;
+  }
+  .sec-link:hover { opacity: .75; }
+  .sec-arrow { color: var(--muted); margin: 0 2px; font-size: 11px; }
+
+  /* ── COMPLIANCE ── */
+  .compliance-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+  }
+  .check-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px;
+    padding: 4px 0;
+  }
+  .check-row input[type=checkbox] { display: none; }
+  .check-box {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 2px solid var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background .15s, border-color .15s;
+    cursor: pointer;
+  }
+  .check-box.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .check-box.checked::after {
+    content: '';
+    width: 8px; height: 5px;
+    border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+  }
+  .compliance-footer {
+    display: flex; justify-content: flex-end;
+    margin-top: 18px;
+  }
+  .btn-teal {
+    background: var(--accent2);
+    color: #0b1a16;
+    border: none; border-radius: 8px;
+    padding: 8px 18px;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 0 16px rgba(38,216,178,0.3);
+    transition: box-shadow .2s, background .2s;
+  }
+  .btn-teal:hover { box-shadow: 0 0 28px rgba(38,216,178,0.5); }
+
+  /* SVG icons inline */
+  svg { display: inline-block; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<!-- <nav>
+  <div class="nav-logo">
+    <div class="logo-dot"></div>
+    SENTINEL <span style="color:var(--accent)">AI</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#">Overview</a></li>
+    <li><a href="#">Transactions</a></li>
+    <li><a href="#">Flagged Alerts <span class="badge">12</span></a></li>
+    <li><a href="#">Analytics</a></li>
+    <li><a href="#">Rules</a></li>
+    <li><a href="#" class="active">Settings</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="avatar">AP</div>
+    <span class="nav-user">Admin</span>
+    <div class="nav-bell">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="dot">12</span>
+    </div>
+  </div>
+</nav> -->
+
+<!-- MAIN -->
+<main>
+  <div class="page-title">System Configuration <span>&</span> Preferences</div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search Settings…"/>
+    </div>
+    <button class="filter-btn">
+      By Category (Thresholds, Security, API)
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <button class="filter-btn">
+      By Status (Active, Disabled, Connected)
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <button class="filter-btn">
+      Date – Range…
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <button class="btn-primary">Save All Changes</button>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Core Analysis Modules</span>
+        <span class="stat-value">253 <span class="delta">(+8)</span></span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon teal">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Active Threshold Profiles</span>
+        <span class="stat-value">213 <span class="delta">(+10)</span></span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Active Integration Feeds</span>
+        <span class="stat-value">15 <span class="delta">(+1)</span></span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon violet">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">AI Core Integrity Check</span>
+        <span class="stat-value">46 <span class="delta">(+4)</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL ROW 1 -->
+  <div class="panel-grid">
+
+    <!-- Data Integrations -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Data Integrations &amp; APIs</div>
+        <button class="btn-outline">Connect New Feed</button>
+      </div>
+      <div class="api-row">
+        <div class="api-label">
+          <div class="service-dot dot-stripe">S</div>
+          Stripe Payment Gateway:
+        </div>
+        <input class="api-input" type="text" placeholder="API Key Field"/>
+        <div class="api-status status-ok">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12c0-1.7.7-3.2 1.7-4.3"/><path d="M8.1 5.1A7.9 7.9 0 0120 12c0 4.4-3.6 8-8 8s-8-3.6-8-8"/><path d="M12 8v4l2 2"/></svg>
+        </div>
+      </div>
+      <div class="api-row">
+        <div class="api-label">
+          <div class="service-dot dot-db">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          External User Database:
+        </div>
+        <input class="api-input" type="text" placeholder="API Endpoint"/>
+        <div class="api-status status-warn">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+      </div>
+      <div class="api-row">
+        <div class="api-label">
+          <div class="service-dot dot-fraud">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          Fraud Threat Intelligence:
+        </div>
+        <input class="api-input" type="text" placeholder="API Token"/>
+        <div class="api-status status-err">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global Detection -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Global Detection Performance</div>
+      </div>
+      <div class="detect-row">
+        <div class="detect-label">Minimum Confidence Score: <span>(0.75)</span></div>
+        <div class="slider-wrap">
+          <input class="slider" type="range" min="0" max="100" value="75"/>
+        </div>
+      </div>
+      <div class="detect-row">
+        <div class="detect-label">Daily Threat Capacity: <span>(1500 Alerts)</span></div>
+        <div class="slider-wrap">
+          <input class="slider teal" type="range" min="0" max="100" value="55"/>
+        </div>
+      </div>
+      <div class="detect-row">
+        <div class="detect-label">Default High-Risk Action: <span>(Decline)</span></div>
+        <select class="select-box">
+          <option>Decline</option>
+          <option>Flag &amp; Review</option>
+          <option>Allow</option>
+          <option>Quarantine</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL ROW 2 -->
+  <div class="panel-grid">
+
+    <!-- Security -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Security &amp; Access Control</div>
+      </div>
+      <div class="sec-row">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <div class="sec-label">Password Complexity:</div>
+        <span class="sec-value">(High)</span>
+        <span class="sec-arrow">→</span>
+        <a href="#" class="sec-link">Edit</a>
+      </div>
+      <div class="sec-row">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <div class="sec-label">Two-Factor Auth:</div>
+        <span class="sec-value">(Enabled)</span>
+        <span class="sec-arrow">→</span>
+        <a href="#" class="sec-link">Edit</a>
+      </div>
+      <div class="sec-row">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <div class="sec-label">Admin Access Rules:</div>
+        <span class="sec-value">(Configure)</span>
+        <span class="sec-arrow">→</span>
+        <a href="#" class="sec-link">View Details</a>
+      </div>
+    </div>
+
+    <!-- Compliance -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Compliance &amp; Notifications</div>
+      </div>
+      <div class="compliance-grid">
+        <label class="check-row">
+          <div class="check-box checked" onclick="this.classList.toggle('checked')"></div>
+          Daily Summary Email
+        </label>
+        <label class="check-row">
+          <div class="check-box checked" onclick="this.classList.toggle('checked')"></div>
+          GDPR Logging Active
+        </label>
+        <label class="check-row">
+          <div class="check-box" onclick="this.classList.toggle('checked')"></div>
+          Immediate High Alert SMS
+        </label>
+        <label class="check-row">
+          <div class="check-box" onclick="this.classList.toggle('checked')"></div>
+          PSD2 Flag active
+        </label>
+        <label class="check-row">
+          <div class="check-box checked" onclick="this.classList.toggle('checked')"></div>
+          GDPR Logging Active
+        </label>
+      </div>
+      <div class="compliance-footer">
+        <button class="btn-teal">Update Alerts</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+{% endblock %}

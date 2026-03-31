@@ -1,11 +1,5 @@
 {% extends "layout.html" %}
 {% block content %}
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sentinel AI – Transactions</title> -->
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   :root {
@@ -651,27 +645,73 @@
 
 <form action="{{ url_for('predict') }}" method="POST">
 
-  <div class="form-group">
-    <label class="form-label">Transaction Amount</label>
-    <div class="input-wrap">
-      <span class="input-prefix">₹</span>
-      <input 
-      type="text" 
-      name="Transaction_Amount_INR"
-      placeholder="Enter amount" 
-      required
-      />
-    </div>
-  </div>
+<div class="form-group">
+<label class="form-label">Transaction Amount</label>
+<div class="input-wrap">
+<span class="input-prefix">₹</span>
+<input 
+type="text" 
+name="Transaction_Amount_INR"
+placeholder="Enter amount" 
+required
+/>
+</div>
+</div>
 
-  <div class="form-group">
-    <label class="form-label">International Transaction</label>
-    <select name="Is_International">
-      <option value="0">Domestic</option>
-      <option value="1">International</option>
-      <option value="1">Cross-Border</option>
-    </select>
-  </div>
+<div class="form-group">
+<label class="form-label">International Transaction</label>
+<select name="Is_International">
+<option value="0">Domestic</option>
+<option value="1">International</option>
+</select>
+</div>
+
+<div class="form-group">
+<label class="form-label">Device Type</label>
+<select name="Device_Type">
+<option value="0">Mobile</option>
+<option value="1">Desktop</option>
+<option value="2">Tablet</option>
+</select>
+</div>
+
+<div class="form-group">
+<label class="form-label">Transaction City</label>
+<input 
+type="text"
+name="Transaction_City"
+placeholder="Enter city"
+required
+/>
+</div>
+
+<div class="form-group">
+<label class="form-label">Merchant Category</label>
+<select name="Merchant_Category">
+<option value="0">Grocery</option>
+<option value="1">Electronics</option>
+<option value="2">Travel</option>
+<option value="3">Shopping</option>
+</select>
+</div>
+
+<div class="form-group">
+<label class="form-label">Card Type</label>
+<select name="Card_Type">
+<option value="0">Debit</option>
+<option value="1">Credit</option>
+</select>
+</div>
+
+<div class="form-group">
+<label class="form-label">Bank</label>
+<select name="Bank">
+<option value="0">SBI</option>
+<option value="1">HDFC</option>
+<option value="2">ICICI</option>
+<option value="3">Axis</option>
+</select>
+</div>
 
   <button type="submit" class="analyze-btn">
     Analyze Transaction
@@ -757,7 +797,4 @@
     </div>
   </div>
 </div>
-
-<!-- </body>
-</html> -->
 {% endblock %}

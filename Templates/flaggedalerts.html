@@ -1,0 +1,765 @@
+{% extends "layout.html" %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c12;
+    --surface: #111520;
+    --surface2: #161b28;
+    --border: #1e2636;
+    --border2: #252f45;
+    --accent: #3d6bff;
+    --accent-glow: rgba(61,107,255,0.18);
+    --red: #ff4560;
+    --red-soft: rgba(255,69,96,0.12);
+    --orange: #ff8c42;
+    --orange-soft: rgba(255,140,66,0.12);
+    --yellow: #f5c842;
+    --yellow-soft: rgba(245,200,66,0.12);
+    --green: #00d68f;
+    --green-soft: rgba(0,214,143,0.1);
+    --teal: #00bcd4;
+    --muted: #4a5568;
+    --text: #e2e8f0;
+    --text2: #8896ac;
+    --text3: #5a6a80;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* subtle grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(61,107,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61,107,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 28px;
+    height: 54px;
+    background: rgba(10,12,18,0.92);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-right: 36px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), #6a5acd);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 0 14px rgba(61,107,255,0.45);
+  }
+
+  .logo-text {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .nav-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+
+  .nav-link.active {
+    color: var(--text);
+    background: transparent;
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -13px;
+    left: 50%; transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--red);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 1px 6px;
+    margin-left: 5px;
+    vertical-align: middle;
+    box-shadow: 0 0 8px rgba(255,69,96,0.5);
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .notif-btn {
+    width: 32px; height: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.18s;
+  }
+  .notif-btn:hover { border-color: var(--accent); }
+  .notif-dot {
+    position: absolute; top: 6px; right: 7px;
+    width: 6px; height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--red);
+  }
+
+  .avatar-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 4px 10px 4px 4px;
+    cursor: pointer;
+    transition: border-color 0.18s;
+  }
+  .avatar-btn:hover { border-color: var(--accent); }
+
+  .avatar {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, var(--accent), #6a5acd);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .avatar-label { font-size: 12px; font-weight: 500; color: var(--text2); }
+
+  /* ── MAIN ── */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 28px 60px;
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+    max-width: 260px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 13px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 12px 8px 34px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .search-input::placeholder { color: var(--text3); }
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .filter-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 13px;
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  .filter-arrow { font-size: 10px; opacity: 0.6; }
+
+  .btn-bulk {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 13px;
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    margin-left: auto;
+  }
+  .btn-bulk:hover { border-color: var(--accent); color: var(--text); }
+
+  .btn-false-pos {
+    display: flex; align-items: center; gap: 7px;
+    background: linear-gradient(135deg, rgba(61,107,255,0.15), rgba(106,90,205,0.15));
+    border: 1px solid rgba(61,107,255,0.35);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #7fa8ff;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .btn-false-pos:hover {
+    background: linear-gradient(135deg, rgba(61,107,255,0.25), rgba(106,90,205,0.25));
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .table-head {
+    display: grid;
+    grid-template-columns: 36px 100px 160px 110px 140px 100px 1fr 130px 150px;
+    gap: 0;
+    padding: 0 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .th {
+    padding: 11px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 36px 100px 160px 110px 140px 100px 1fr 130px 150px;
+    gap: 0;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .row:last-child { border-bottom: none; }
+  .row:hover { background: rgba(61,107,255,0.04); }
+
+  .row::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .row.high::before { background: var(--red); box-shadow: 2px 0 8px var(--red); }
+  .row.medium::before { background: var(--yellow); }
+  .row:hover::before { opacity: 1; }
+
+  .td {
+    padding: 18px 10px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text2);
+    overflow: hidden;
+  }
+
+  .cb {
+    width: 16px; height: 16px;
+    background: var(--surface2);
+    border: 1.5px solid var(--border2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .cb:hover { border-color: var(--accent); }
+
+  .alert-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.03em;
+  }
+
+  .tx-type {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .risk-high {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red);
+    background: var(--red-soft);
+    border: 1px solid rgba(255,69,96,0.2);
+    border-radius: 6px;
+    padding: 4px 9px;
+    white-space: nowrap;
+  }
+
+  .risk-medium {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--yellow);
+    background: var(--yellow-soft);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 6px;
+    padding: 4px 9px;
+    white-space: nowrap;
+  }
+
+  .timestamp {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .amount {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  .ind-icon {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+
+  .ind-globe { background: rgba(0,188,212,0.15); color: var(--teal); }
+  .ind-velocity { background: rgba(255,140,66,0.15); color: var(--orange); }
+  .ind-user { background: rgba(245,200,66,0.15); color: var(--yellow); }
+  .ind-clock { background: rgba(255,69,96,0.15); color: var(--red); }
+
+  /* Status chips */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 20px;
+    padding: 4px 11px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .status-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-pending {
+    background: rgba(245,200,66,0.1);
+    border: 1px solid rgba(245,200,66,0.25);
+    color: var(--yellow);
+  }
+  .status-pending .status-dot { background: var(--yellow); box-shadow: 0 0 4px var(--yellow); animation: pulse 1.8s infinite; }
+
+  .status-investigating {
+    background: rgba(255,140,66,0.1);
+    border: 1px solid rgba(255,140,66,0.25);
+    color: var(--orange);
+  }
+  .status-investigating .status-dot { background: var(--orange); box-shadow: 0 0 4px var(--orange); animation: pulse 1.8s infinite; }
+
+  .status-awaiting {
+    background: rgba(138,148,168,0.1);
+    border: 1px solid rgba(138,148,168,0.2);
+    color: var(--text2);
+  }
+  .status-awaiting .status-dot { background: var(--text2); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .action-link {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 1px 0;
+    white-space: nowrap;
+  }
+  .action-link:hover { color: #7fa8ff; text-shadow: 0 0 8px var(--accent-glow); }
+
+  .action-link.danger { color: var(--red); }
+  .action-link.danger:hover { color: #ff7a93; text-shadow: 0 0 8px rgba(255,69,96,0.3); }
+
+  .action-link.warn { color: var(--orange); }
+  .action-link.warn:hover { color: #ffaa6b; }
+
+  /* row entrance animation */
+  .row {
+    animation: rowIn 0.35s ease both;
+  }
+  .row:nth-child(1) { animation-delay: 0.05s; }
+  .row:nth-child(2) { animation-delay: 0.12s; }
+  .row:nth-child(3) { animation-delay: 0.19s; }
+
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Sparkle icon in last row */
+  .sparkle {
+    color: var(--accent);
+    font-size: 16px;
+    margin-left: 4px;
+    animation: sparkleAnim 2s ease-in-out infinite;
+  }
+  @keyframes sparkleAnim {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+</style>
+</head>
+<body>
+
+<!-- MAIN -->
+<main>
+  <h1>Flagged Alerts</h1>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder="Search Alerts">
+    </div>
+
+    <button class="filter-btn">By Risk Score <span class="filter-arrow">▼</span></button>
+    <button class="filter-btn">↑ Transaction Type <span class="filter-arrow">▼</span></button>
+    <button class="filter-btn">📅 Date – Range <span class="filter-arrow">▼</span></button>
+
+    <button class="btn-bulk">Bulk Actions <span class="filter-arrow">▼</span></button>
+    <button class="btn-false-pos">Mark Selected as False Positive</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+
+    <!-- HEAD -->
+    <div class="table-head">
+      <div class="th"></div>
+      <div class="th">[Alert ID]</div>
+      <div class="th">[Transaction Type]</div>
+      <div class="th">[Risk Score]</div>
+      <div class="th">[Timestamp]</div>
+      <div class="th">[Amount]</div>
+      <div class="th">[Risk Indicators]</div>
+      <div class="th">[Status]</div>
+      <div class="th">[Actions]</div>
+    </div>
+
+    <!-- BODY -->
+    <div class="table-body">
+
+      <!-- ROW 1 -->
+      <div class="row high">
+        <div class="td"><div class="cb"></div></div>
+        <div class="td"><span class="alert-id">FLG-001</span></div>
+        <div class="td"><span class="tx-type">Credit Card</span></div>
+        <div class="td"><span class="risk-high">95% High</span></div>
+        <div class="td"><span class="timestamp">May 24, 14:32</span></div>
+        <div class="td"><span class="amount">$120.50</span></div>
+        <div class="td">
+          <div class="indicators">
+            <div class="indicator">
+              <div class="ind-icon ind-globe">🌐</div>
+              Location Mismatch
+            </div>
+            <div class="indicator">
+              <div class="ind-icon ind-velocity">🔄</div>
+              High Velocity
+            </div>
+          </div>
+        </div>
+        <div class="td">
+          <div class="status status-pending">
+            <div class="status-dot"></div>
+            Pending Review
+          </div>
+        </div>
+        <div class="td">
+          <div class="actions">
+            <span class="action-link">View Details</span>
+            <span class="action-link warn">Freeze Card</span>
+            <span class="action-link danger">Dismiss</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2 -->
+      <div class="row high">
+        <div class="td"><div class="cb"></div></div>
+        <div class="td"><span class="alert-id">FLG-002</span></div>
+        <div class="td"><span class="tx-type">Wire Transfer</span></div>
+        <div class="td"><span class="risk-high">85% High</span></div>
+        <div class="td"><span class="timestamp">May 24, 11:15</span></div>
+        <div class="td"><span class="amount">$14,250.00</span></div>
+        <div class="td">
+          <div class="indicators">
+            <div class="indicator">
+              <div class="ind-icon ind-globe">🌐</div>
+              IP Anomaly
+            </div>
+            <div class="indicator">
+              <div class="ind-icon ind-user">👤</div>
+              Mismatched Usage
+            </div>
+          </div>
+        </div>
+        <div class="td">
+          <div class="status status-investigating">
+            <div class="status-dot"></div>
+            Investigating
+          </div>
+        </div>
+        <div class="td">
+          <div class="actions">
+            <span class="action-link">View Details</span>
+            <span class="action-link warn">Request Info</span>
+            <span class="action-link danger">Dismiss</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3 -->
+      <div class="row medium">
+        <div class="td"><div class="cb"></div></div>
+        <div class="td"><span class="alert-id">FLG-003</span></div>
+        <div class="td"><span class="tx-type">Credit Card</span></div>
+        <div class="td"><span class="risk-medium">72% Medium</span></div>
+        <div class="td"><span class="timestamp">May 23, 16:01</span></div>
+        <div class="td"><span class="amount">$45.99</span></div>
+        <div class="td">
+          <div class="indicators">
+            <div class="indicator">
+              <div class="ind-icon ind-clock">⏱</div>
+              High Frequency
+            </div>
+          </div>
+        </div>
+        <div class="td">
+          <div class="status status-awaiting">
+            <div class="status-dot"></div>
+            Awaiting Feedback
+          </div>
+        </div>
+        <div class="td">
+          <div class="actions">
+            <span class="action-link">View Details</span>
+            <span class="action-link warn">Freeze Card</span>
+          </div>
+        </div>
+      </div>
+
+<!-- ROW 2 -->
+      <div class="row high">
+        <div class="td"><div class="cb"></div></div>
+        <div class="td"><span class="alert-id">FLG-004</span></div>
+        <div class="td"><span class="tx-type">Wire Transfer</span></div>
+        <div class="td"><span class="risk-high">64% High</span></div>
+        <div class="td"><span class="timestamp">May 24, 11:15</span></div>
+        <div class="td"><span class="amount">$14,250.00</span></div>
+        <div class="td">
+          <div class="indicators">
+            <div class="indicator">
+              <div class="ind-icon ind-globe">🌐</div>
+              IP Anomaly
+            </div>
+            <div class="indicator">
+              <div class="ind-icon ind-user">👤</div>
+              Mismatched Usage
+            </div>
+          </div>
+        </div>
+        <div class="td">
+          <div class="status status-investigating">
+            <div class="status-dot"></div>
+            Investigating
+          </div>
+        </div>
+        <div class="td">
+          <div class="actions">
+            <span class="action-link">View Details</span>
+            <span class="action-link warn">Request Info</span>
+            <span class="action-link danger">Dismiss</span>
+          </div>
+        </div>
+      </div>
+
+     <!-- ROW 3 -->
+      <div class="row medium">
+        <div class="td"><div class="cb"></div></div>
+        <div class="td"><span class="alert-id">FLG-005</span></div>
+        <div class="td"><span class="tx-type">Credit Card</span></div>
+        <div class="td"><span class="risk-medium">92% Medium</span></div>
+        <div class="td"><span class="timestamp">May 23, 16:01</span></div>
+        <div class="td"><span class="amount">$45.99</span></div>
+        <div class="td">
+          <div class="indicators">
+            <div class="indicator">
+              <div class="ind-icon ind-clock">⏱</div>
+              High Frequency
+            </div>
+          </div>
+        </div>
+        <div class="td">
+          <div class="status status-awaiting">
+            <div class="status-dot"></div>
+            Awaiting Feedback
+          </div>
+        </div>
+        <div class="td">
+          <div class="actions">
+            <span class="action-link">View Details</span>
+            <span class="action-link warn">Freeze Card</span>
+          </div>
+        </div>
+      </div>
+
+
+    </div><!-- /table-body -->
+  </div><!-- /table-wrap -->
+</main>
+{% endblock %}

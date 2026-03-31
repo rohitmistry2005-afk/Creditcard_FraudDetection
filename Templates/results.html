@@ -4,7 +4,7 @@
 
 <style>
 
-*{
+.result-wrapper *{
 margin:0;
 padding:0;
 box-sizing:border-box;
@@ -14,10 +14,21 @@ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 /* Background */
 
 .result-wrapper{
-height:90vh;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+
 display:flex;
 align-items:center;
 justify-content:center;
+
+background:rgba(5,10,20,0.55);
+backdrop-filter:blur(6px);
+
+z-index:999;
+
 color:white;
 }
 
@@ -31,13 +42,12 @@ border-radius:18px;
 
 background:rgba(25,35,60,0.75);
 backdrop-filter: blur(18px);
--webkit-backdrop-filter: blur(18px);
 
 border:1px solid rgba(255,255,255,0.08);
 
 box-shadow:
-0 20px 60px rgba(0,0,0,0.6),
-inset 0 1px 0 rgba(255,255,255,0.05);
+0 30px 80px rgba(0,0,0,0.8),
+0 0 40px rgba(80,150,255,0.15);
 
 text-align:center;
 }
@@ -109,6 +119,12 @@ color:#58e48c;
 
 .red{
 color:#ff5f5f;
+}
+
+.probability{
+font-size:13px;
+color:#9aa7c2;
+margin-bottom:8px;
 }
 
 
@@ -196,8 +212,15 @@ Credit Card Fraud Detection:
 </span>
 </h3>
 
+<div class="probability">
+Fraud Probability: {{ probability }}%
+</div>
+
 <div class="progress">
-<div class="progress-bar {% if prediction == 1 %}fraud{% endif %}"></div>
+<div 
+class="progress-bar {% if prediction == 1 %}fraud{% endif %}" 
+data-width="{{ probability }}">
+</div>
 </div>
 
 </div>
@@ -215,5 +238,10 @@ TXN-FORM-AUTO | {{ amount if amount else "May 24, 2024" }}
 </div>
 
 </div>
+<script>
+document.querySelectorAll(".progress-bar").forEach(bar => {
+bar.style.width = bar.dataset.width + "%";
+});
+</script>
 
 {% endblock %}
